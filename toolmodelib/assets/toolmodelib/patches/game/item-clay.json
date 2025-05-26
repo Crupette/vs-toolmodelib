@@ -1,0 +1,8 @@
+[
+    {   "file": "game:itemtypes/resource/clay.json",
+        "path": "/class",
+        "op": "replace",
+        "value": "toolmodelib:ItemClayWithModes",
+        "side": "server"
+    }
+]
