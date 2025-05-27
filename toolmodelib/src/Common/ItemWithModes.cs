@@ -10,7 +10,7 @@ using Vintagestory.API.Util;
 
 namespace ToolModeLib;
 
-public abstract class ItemWithModes : Item, ICollectibleWithModes
+public class ItemWithModes : Item, ICollectibleWithModes
 {
     /// <summary>
     /// Tool modes registered to this specific item.
