@@ -1,0 +1,11 @@
+{
+    "code": "game:item-hammer",
+    "members": [
+        "game:hammer-hit",
+        "game:hammer-upset-up",
+        "game:hammer-upset-right",
+        "game:hammer-upset-down",
+        "game:hammer-upset-up",
+        "game:hammer-split"
+    ]
+}

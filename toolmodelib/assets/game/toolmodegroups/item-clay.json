@@ -1,0 +1,9 @@
+{
+    "code": "game:item-clay",
+    "members": [
+        "game:clay-1size",
+        "game:clay-2size",
+        "game:clay-3size",
+        "game:clay-duplicate"
+    ]
+}

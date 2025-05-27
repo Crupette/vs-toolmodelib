@@ -1,0 +1,7 @@
+{
+    "code": "game:item-scythe",
+    "members": [
+        "game:scythe-trim",
+        "game:scythe-remove"
+    ]
+}

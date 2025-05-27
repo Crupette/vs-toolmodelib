@@ -21,12 +21,13 @@ public class ToolModeRegistry : ModSystem
 
         api.Network.RegisterChannel("toolmodelib:syncmode").RegisterMessageType<ToolModeSyncPacket>();
 
+        api.RegisterItemClass("toolmodelib:ItemWithModes", typeof(ItemWithModes));
+
         api.RegisterItemClass("toolmodelib:ItemClayWithModes", typeof(Content.ItemClayWithModes));
         api.RegisterToolMode("game:clay-1size", typeof(Content.ToolModeClay1Size));
         api.RegisterToolMode("game:clay-2size", typeof(Content.ToolModeClay2Size));
         api.RegisterToolMode("game:clay-3size", typeof(Content.ToolModeClay3Size));
         api.RegisterToolMode("game:clay-duplicate", typeof(Content.ToolModeClayDuplicate));
-        api.RegisterToolModeGroup("game:item-clay", "game:clay-1size", "game:clay-2size", "game:clay-3size", "game:clay-duplicate");
 
         api.RegisterItemClass("toolmodelib:ItemHammerWithModes", typeof(Content.ItemHammerWithModes));
         api.RegisterToolMode("game:hammer-hit", typeof(Content.ToolModeHammerHit));
@@ -35,12 +36,10 @@ public class ToolModeRegistry : ModSystem
         api.RegisterToolMode("game:hammer-upset-down", typeof(Content.ToolModeHammerUpsetDown));
         api.RegisterToolMode("game:hammer-upset-left", typeof(Content.ToolModeHammerUpsetLeft));
         api.RegisterToolMode("game:hammer-split", typeof(Content.ToolModeHammerSplit));
-        api.RegisterToolModeGroup("game:item-hammer", "game:hammer-hit", "game:hammer-upset-up", "game:hammer-upset-right", "game:hammer-upset-down", "game:hammer-upset-left", "game:hammer-split");
 
         api.RegisterItemClass("toolmodelib:ItemScytheWithModes", typeof(Content.ItemScytheWithModes));
         api.RegisterToolMode("game:scythe-trim", typeof(Content.ToolModeScytheTrim));
         api.RegisterToolMode("game:scythe-remove", typeof(Content.ToolModeScytheRemove));
-        api.RegisterToolModeGroup("game:item-scythe", "game:scythe-trim", "game:scythe-remove");
 
         if(!Harmony.HasAnyPatches(Mod.Info.ModID)) {
             harmony = new Harmony(Mod.Info.ModID);
