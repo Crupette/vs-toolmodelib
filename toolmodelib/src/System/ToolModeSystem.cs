@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using HarmonyLib;
 using ProtoBuf;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Server;
+using Vintagestory.API.Util;
 
 namespace ToolModeLib;
 
@@ -13,6 +15,9 @@ public class ToolModeRegistry : ModSystem
     Dictionary<AssetLocation, List<AssetLocation>> groupModes = new();
     Dictionary<AssetLocation, Type> CodeToTypeMapping = new();
 
+    Dictionary<int, ToolMode[]> ItemToolModes = new();
+    Dictionary<int, AssetLocation> ItemGroups = new();
+
     Harmony harmony;
 
     public override void Start(ICoreAPI api)
@@ -20,8 +25,6 @@ public class ToolModeRegistry : ModSystem
         base.Start(api);
 
         api.Network.RegisterChannel("toolmodelib:syncmode").RegisterMessageType<ToolModeSyncPacket>();
-
-        api.RegisterItemClass("toolmodelib:ItemWithModes", typeof(ItemWithModes));
 
         api.RegisterItemClass("toolmodelib:ItemClayWithModes", typeof(Content.ItemClayWithModes));
         api.RegisterToolMode("game:clay-1size", typeof(Content.ToolModeClay1Size));
@@ -50,6 +53,9 @@ public class ToolModeRegistry : ModSystem
     public override void Dispose()
     {
         harmony?.UnpatchAll(Mod.Info.ModID);
+
+        groupModes = new();
+        CodeToTypeMapping = new();
     }
 
     public void RegisterToolMode(AssetLocation code, Type type)
@@ -99,13 +105,71 @@ public class ToolModeRegistry : ModSystem
         return mode;
     }
 
+    public void SetCollectibleToolModes(CollectibleObject collObj, ToolMode[] modes)
+    {
+        switch (collObj.ItemClass)
+        {
+            case EnumItemClass.Block: throw new NotImplementedException(); break;
+            case EnumItemClass.Item: ItemToolModes.Add(collObj.Id, modes); break;
+        }
+    }
+
+    public void SetCollectibleGroup(CollectibleObject collObj, AssetLocation group)
+    {
+        switch (collObj.ItemClass)
+        {
+            case EnumItemClass.Block: throw new NotImplementedException();
+            case EnumItemClass.Item: ItemGroups.Add(collObj.Id, group); break;
+        }
+    }
+
+    public ToolMode[] GetCollectibleToolModes(CollectibleObject collObj)
+    {
+        return collObj.ItemClass switch
+        {
+            EnumItemClass.Block => null,
+            EnumItemClass.Item => ItemToolModes.GetValueOrDefault(collObj.Id)
+        };
+    }
+
+    public AssetLocation GetCollectibleGroup(CollectibleObject collObj)
+    {
+        AssetLocation group;
+        switch (collObj.ItemClass)
+        {
+            case EnumItemClass.Block:
+                throw new NotImplementedException();
+            case EnumItemClass.Item:
+                if (!ItemGroups.TryGetValue(collObj.Id, out group)) return null;
+                return group;
+        }
+        return null;
+    }
+
+    internal void UnloadCollectibleToolModes(ICoreAPI api, CollectibleObject collObj)
+    {
+        ToolMode[] modes = null;
+        switch (collObj.ItemClass)
+        {
+            case EnumItemClass.Block:
+                break;
+            case EnumItemClass.Item:
+                if (!ItemToolModes.TryGetValue(collObj.Id, out modes)) return;
+                modes.Foreach(mode => mode.OnUnloaded(api));
+                ItemToolModes.Remove(collObj.Id);
+                break;
+        }
+    }
+
     public ToolMode[] CreateToolModeGroup(AssetLocation group)
     {
-        if(!groupModes.TryGetValue(group, out var groupTypes)) {
+        if (!groupModes.TryGetValue(group, out var groupTypes))
+        {
             throw new Exception($"Don't know how to instantiate tool mode group of code '{group}'. Did you forget to register this group?");
         }
         List<ToolMode> newModes = new();
-        foreach(var typeCode in groupTypes) {
+        foreach (var typeCode in groupTypes)
+        {
             newModes.Add(CreateToolMode(group, typeCode));
         }
         return newModes.ToArray();

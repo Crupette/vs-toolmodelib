@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
+using System.Linq;
 using Vintagestory.API.Common;
 using Vintagestory.API.Datastructures;
 using Vintagestory.GameContent;
@@ -46,6 +47,25 @@ public static class ToolModeAPI
         api.GetToolModeRegistry().RegisterModeGroup(code, types);
     }
 
+    public static ToolMode[] GetToolModeObjs(this CollectibleObject collObj, ICoreAPI api)
+    {
+        return api.GetToolModeRegistry().GetCollectibleToolModes(collObj);
+    }
+
+    public static ToolMode GetToolModeObj(this CollectibleObject collObj, ICoreAPI api, IPlayer forPlayer)
+    {
+        ToolMode[] toolModes = GetToolModeObjs(collObj, api);
+        if (toolModes == null) return null;
+
+        AssetLocation modeCode = GetCollectibleToolMode(forPlayer, collObj);
+        return toolModes.FirstOrDefault(mode => mode.Code == modeCode);
+    }
+
+    public static AssetLocation GetToolModeGroup(this CollectibleObject collObj, ICoreAPI api)
+    {
+        return api.GetToolModeRegistry().GetCollectibleGroup(collObj);
+    }
+
     internal const string KEY_GROUPTOOLMODETREE = "toolmodelib:group";
     internal const string KEY_ITEMTOOLMODETREE = "toolmodelib:item";
     internal const string KEY_BLOCKTOOLMODETREE = "toolmodelib:block";
@@ -72,6 +92,15 @@ public static class ToolModeAPI
     public static AssetLocation GetGroupToolMode(IPlayer forPlayer, AssetLocation group)
     { return GetTreeToolMode(forPlayer, group, KEY_GROUPTOOLMODETREE); }
     
+    public static AssetLocation GetCollectibleToolMode(IPlayer forPlayer, CollectibleObject collObj)
+    {
+        return collObj.ItemClass switch
+        {
+            EnumItemClass.Block => throw new NotImplementedException(),
+            EnumItemClass.Item => GetItemToolMode(forPlayer, collObj as Item)
+        };
+    }
+
     /// <summary>
     /// Returns the tool mode identifier for the given item.
     /// If the item is a part of a group, this method prioritizes the item-specific tool modes.
@@ -80,23 +109,25 @@ public static class ToolModeAPI
     /// <param name="forPlayer">player to get the tool mode for.</param>
     /// <param name="item">item to get the tool mode for.</param>
     /// <returns>tool mode identifier.</returns>
-    public static AssetLocation GetItemToolMode(IPlayer forPlayer, ItemWithModes item)
+    public static AssetLocation GetItemToolMode(IPlayer forPlayer, Item item)
     {
         AssetLocation itemMode = GetTreeToolMode(forPlayer, item.Code, KEY_ITEMTOOLMODETREE);
-        if (item.Group == null) return itemMode;
+        AssetLocation itemGroup = item.GetToolModeGroup(forPlayer.Entity.Api);
+        if (itemGroup == null) return itemMode;
 
-        AssetLocation groupMode = GetGroupToolMode(forPlayer, item.Group);
-        if (groupMode == null) return itemMode;
-        return groupMode;
+        AssetLocation groupMode = GetGroupToolMode(forPlayer, itemGroup);
+        if (itemMode == null) return groupMode;
+        return itemMode;
     }
 
-    public static AssetLocation GetBlockToolMode(IPlayer forPlayer, BlockWithModes block) 
-    { 
+    public static AssetLocation GetBlockToolMode(IPlayer forPlayer, Block block)
+    {
+        AssetLocation blockGroup = block.GetToolModeGroup(forPlayer.Entity.Api);
         AssetLocation blockMode = GetTreeToolMode(forPlayer, block.Code, KEY_BLOCKTOOLMODETREE);
-        if(block.Group == null) return blockMode;
+        if (blockGroup == null) return blockMode;
 
-        AssetLocation groupMode = GetGroupToolMode(forPlayer, block.Group);
-        if(groupMode != null) return groupMode;
+        AssetLocation groupMode = GetGroupToolMode(forPlayer, blockGroup);
+        if (groupMode != null) return groupMode;
         return blockMode;
     }
 
@@ -135,6 +166,15 @@ public static class ToolModeAPI
         SetTreeToolMode(byPlayer, KEY_GROUPTOOLMODETREE, group, mode);
     }
 
+    public static void SetCollectibleToolMode(IPlayer byPlayer, CollectibleObject collObj, ToolMode mode)
+    {
+        switch (collObj.ItemClass)
+        {
+            case EnumItemClass.Block: throw new NotImplementedException();
+            case EnumItemClass.Item: SetItemToolMode(byPlayer, collObj as Item, mode); break;
+        }
+    }
+
     /// <summary>
     /// Sets the tool mode for an item given a tool mode instance.
     /// If the passed mode has a group that matches the item's group, sets the group tool mode instead.
@@ -142,11 +182,13 @@ public static class ToolModeAPI
     /// <param name="byPlayer">player to set the tool mode for.</param>
     /// <param name="item">item to set the tool mode for.</param>
     /// <param name="mode">tool mode to set to.</param>
-    public static void SetItemToolMode(IPlayer byPlayer, ItemWithModes item, ToolMode mode)
+    public static void SetItemToolMode(IPlayer byPlayer, Item item, ToolMode mode)
     {
-        if (item.Group != null && item.Group == mode?.Group)
+        AssetLocation itemGroup = item.GetToolModeGroup(byPlayer.Entity.Api);
+        if (itemGroup != null && itemGroup == mode?.Group)
         {
-            SetGroupToolMode(byPlayer, item.Group, mode);
+            SetGroupToolMode(byPlayer, itemGroup, mode);
+            SetTreeToolMode(byPlayer, KEY_ITEMTOOLMODETREE, item.Code, null as ToolMode);
         }
         else
         {
@@ -154,12 +196,13 @@ public static class ToolModeAPI
         }
     }
 
-    public static void SetBlockToolMode(IPlayer byPlayer, BlockWithModes block, ToolMode mode)
+    public static void SetBlockToolMode(IPlayer byPlayer, Block block, ToolMode mode)
     {
+        AssetLocation blockGroup = block.GetToolModeGroup(byPlayer.Entity.Api);
         if(mode != null && mode.Group != block.Code) {
             SetGroupToolMode(byPlayer, mode.Group, mode);
-        }else if(block.Group != null){
-            SetGroupToolMode(byPlayer, block.Group, null);
+        }else if(blockGroup != null){
+            SetGroupToolMode(byPlayer, blockGroup, null);
         }
         SetTreeToolMode(byPlayer, KEY_BLOCKTOOLMODETREE, block.Code, mode);
     }

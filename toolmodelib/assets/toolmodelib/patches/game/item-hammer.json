@@ -4,5 +4,12 @@
         "op": "replace",
         "value": "toolmodelib:ItemHammerWithModes",
         "side": "server"
+    },
+    {
+        "file": "game:itemtypes/tool/hammer.json",
+        "path": "/attributes/toolmodegroup",
+        "op": "add",
+        "value": "game:item-hammer",
+        "side": "server"
     }
 ]

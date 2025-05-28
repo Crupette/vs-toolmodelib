@@ -13,8 +13,6 @@ namespace ToolModeLib.Content;
 
 public class ItemScytheWithModes : ItemMultiBreakWithModes
 {
-    public override AssetLocation Group => "game:item-scythe";
-
     string[] allowedPrefixes;
     string[] disallowedSuffixes;
 

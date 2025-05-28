@@ -4,5 +4,11 @@
         "op": "replace",
         "value": "toolmodelib:ItemScytheWithModes",
         "side": "server"
+    },
+    {   "file": "game:itemtypes/tool/scythe.json",
+        "path": "/attributes/toolmodegroup",
+        "op": "add",
+        "value": "game:item-scythe",
+        "side": "server"
     }
 ]

@@ -8,10 +8,8 @@ using Vintagestory.GameContent;
 
 namespace ToolModeLib.Content;
 
-public class ItemClayWithModes : ItemWithModes
+public class ItemClayWithModes : Item
 {
-    public override AssetLocation Group => "game:item-clay";
-
     public override void OnHeldInteractStart(ItemSlot slot, EntityAgent byEntity, BlockSelection blockSel, EntitySelection entitySel, bool firstEvent, ref EnumHandHandling handling)
     {
         if(blockSel == null) return;

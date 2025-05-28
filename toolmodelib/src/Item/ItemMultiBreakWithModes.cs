@@ -10,10 +10,8 @@ using Vintagestory.GameContent;
 
 namespace ToolModeLib.Content;
 
-public class ItemMultiBreakWithModes : ItemWithModes
+public class ItemMultiBreakWithModes : Item
 {
-    public override AssetLocation Group => "game:item-scythe";
-
     public virtual bool CanMultiBreak(Block block) {
         return true;
     }
@@ -21,7 +19,7 @@ public class ItemMultiBreakWithModes : ItemWithModes
     public override float OnBlockBreaking(IPlayer player, BlockSelection blockSel, ItemSlot itemslot, float remainingResistance, float dt, int counter)
     {
         remainingResistance = base.OnBlockBreaking(player, blockSel, itemslot, remainingResistance, dt, counter);
-        ToolMode mode = GetRealToolMode(player);
+        ToolMode mode = this.GetToolModeObj(api, player);
         if(mode is IActOnBlockBreakingAfter listener) {
             return listener.OnBlockBreakingAfter(player, blockSel, itemslot, remainingResistance, dt, counter);
         }

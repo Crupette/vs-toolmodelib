@@ -4,5 +4,11 @@
         "op": "replace",
         "value": "toolmodelib:ItemClayWithModes",
         "side": "server"
+    },
+    {   "file": "game:itemtypes/resource/clay.json",
+        "path": "/attributes/toolmodegroup",
+        "op": "add",
+        "value": "game:item-clay",
+        "side": "server"
     }
 ]

@@ -10,10 +10,8 @@ using Vintagestory.GameContent;
 
 namespace ToolModeLib.Content;
 
-public class ItemHammerWithModes : ItemWithModes
+public class ItemHammerWithModes : Item
 {
-    public override AssetLocation Group => "game:item-hammer";
-
     public override string GetHeldTpHitAnimation(ItemSlot slot, Entity byEntity)
     {
         return (byEntity as EntityPlayer)?.EntitySelection != null ? "hammerhit" : base.GetHeldTpHitAnimation(slot, byEntity);
